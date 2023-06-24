@@ -1,5 +1,66 @@
 from typing import Any
 
+class Meters:
+    def __init__(self, variable_names=None):
+        self.variables = {}
+        self.history = {}
+        
+        if variable_names is not None:
+            for name in variable_names:
+                self.register(name)
+
+    def register(self, name):
+        self.variables[name] = []
+        self.history[name] = []
+
+    def update(self, data, step=None):
+        for name, value in data.items():
+            if name in self.variables:
+                self.variables[name].append(value)
+                self.history[name].append((len(self.variables[name]) if not step else step, value))
+
+    def history(self, name):
+        if name in self.history:
+            return self.history[name]
+
+    def mean(self, name):
+        if name in self.variables:
+            values = self.variables[name]
+            if len(values) > 0:
+                return sum(values) / len(values)
+
+    def recent_value(self, name):
+        if name in self.variables:
+            values = self.variables[name]
+            if len(values) > 0:
+                return values[-1]
+            else:
+                return 0.0
+
+    def clear_history(self, name):
+        if name in self.history:
+            self.history[name] = []
+
+    def get_recent_values(self, decimals=4):
+        recent_values = {}
+        for name in self.variables:
+            recent_values[name] = np.round(self.recent_value(name), decimals)
+        return recent_values
+    
+    def export_all_history(self):
+        for name in self.variables:
+            self._export_single_history(name)
+
+    def _export_single_history(self, variable_name):
+        if variable_name in self.variables:
+            filename = f'history_{variable_name}.csv'
+            with open(filename, 'w', newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(['Index', variable_name])
+                hist = self.history[variable_name]
+                for index, value in hist:
+                    writer.writerow([index, value])
+
 class EasyDict(dict):
     """
     Allows you to access and modify dictionary keys using dot notation instead of the usual square bracket notation.
