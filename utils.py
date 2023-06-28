@@ -1,4 +1,27 @@
 from typing import Any
+from time import time
+
+class Profiler:
+    """From https://github.com/acids-ircam/RAVE/blob/master/rave/model.py"""
+    def __init__(self):
+        # Initialize the list of ticks with a single item representing the start time
+        self.ticks = [[time(), None]]
+
+    def tick(self, msg):
+        # Mark a specific point in the code for profiling
+        # Add a new item to the list of ticks with the current time and the provided message
+        self.ticks.append([time(), msg])
+
+    def __repr__(self):
+        rep = 80 * "=" + "\n"  # Separator line for the report
+        for i in range(1, len(self.ticks)):
+            msg = self.ticks[i][1]
+            ellapsed = self.ticks[i][0] - self.ticks[i - 1][0]
+            rep += msg + f": {ellapsed*1000:.2f}ms\n"  # Append the message and elapsed time to the report
+        rep += 80 * "=" + "\n\n\n"  # Separator line for the end of the report
+        return rep
+
+
 
 class Meters:
     def __init__(self, variable_names=None):
