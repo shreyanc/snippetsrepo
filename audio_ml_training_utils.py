@@ -1,6 +1,13 @@
 import os
 import pickle
 
+def compute_envelope(self, x, k=201):
+    kernel_size = k
+    abs_x = torch.abs(x)
+    max_envelope = F.max_pool1d(abs_x, kernel_size, stride=1, padding=(kernel_size - 1) // 2)
+    filtered_envelope = F.avg_pool1d(max_envelope, kernel_size, stride=1, padding=(kernel_size - 1) // 2)
+    return filtered_envelope
+
 def cache_envelope(audio_file, k, envelope, cache_dir):
     """
     Caches the calculated envelope data for an audio file with a specified smoothing factor 'k'.
